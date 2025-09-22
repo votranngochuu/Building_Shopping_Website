@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PizzaStore - Online Shopping</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .navbar-brand {
+            font-weight: bold;
+            color: #dc3545 !important;
+        }
+        .card {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s ease;
+        }
+        .card:hover {
+            transform: translateY(-3px);
+        }
+        .card-header {
+            background: linear-gradient(135deg, #dc3545 0%, #fd7e14 100%);
+            color: white;
+            border-radius: 15px 15px 0 0 !important;
+            font-weight: 600;
+        }
+        .product-card {
+            height: 100%;
+            border-radius: 15px;
+            overflow: hidden;
+        }
+        .product-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            background: linear-gradient(135deg, #e9ecef 0%, #dee2e6 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .product-price {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #dc3545;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #dc3545 0%, #fd7e14 100%);
+            border: none;
+            border-radius: 25px;
+            padding: 8px 20px;
+            font-weight: 500;
+        }
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
+        }
+        .form-control, .form-select {
+            border-radius: 10px;
+            border: 2px solid #e9ecef;
+        }
+        .form-control:focus, .form-select:focus {
+            border-color: #dc3545;
+            box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+        }
+        .alert {
+            border-radius: 10px;
+            border: none;
+        }
+        .cart-badge {
+            background: #dc3545;
+            color: white;
+            border-radius: 50%;
+            padding: 2px 6px;
+            font-size: 0.8rem;
+            position: absolute;
+            top: -5px;
+            right: -5px;
+        }
+        .availability-badge {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 0.8rem;
+            border-radius: 15px;
+            padding: 4px 8px;
+        }
+        .pizza-icon {
+            font-size: 4rem;
+            color: #dc3545;
+            opacity: 0.3;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand" href="#">
+                <i class="fas fa-pizza-slice me-2"></i>PizzaStore
+            </a>
+            
+            <div class="navbar-nav ms-auto">
+                <a class="nav-link position-relative" href="#" onclick="viewCart()">
+                    <i class="fas fa-shopping-cart me-1"></i>Cart
+                    <span class="cart-badge" id="cartBadge">0</span>
+                </a>
+                <a class="nav-link" href="#" onclick="showUserProfile()">
+                    <i class="fas fa-user me-1"></i>Profile
+                </a>
+                <a class="nav-link" href="LoginServlet?action=Logout">
+                    <i class="fas fa-sign-out-alt me-1"></i>Logout
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <!-- Page Header -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <h2><i class="fas fa-store me-2"></i>Welcome to PizzaStore</h2>
+                <p class="text-muted">Delicious pizzas delivered fresh to your door</p>
+            </div>
+        </div>
+
+        <!-- Success/Error Messages -->
+        <c:if test="${not empty ERROR}">
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <i class="fas fa-exclamation-triangle me-2"></i>${ERROR}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        </c:if>
+        
+        <c:if test="${not empty MESSAGE}">
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                <i class="fas fa-check-circle me-2"></i>${MESSAGE}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        </c:if>
+
+        <div class="row">
+            <!-- Search Panel -->
+            <div class="col-lg-3 mb-4">
+                <div class="card">
+                    <div class="card-header">
+                        <i class="fas fa-search me-2"></i>Search Products
+                    </div>
+                    <div class="card-body">
+                        <!-- Search by Name -->
+                        <form method="post" action="ShoppingServlet" class="mb-3">
+                            <input type="hidden" name="action" value="Search">
+                            <div class="mb-3">
+                                <label class="form-label">Search by Name:</label>
+                                <div class="input-group">
+                                    <input type="text" class="form-control" name="searchName" 
+                                           placeholder="Enter product name">
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="fas fa-search"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                        
+                        <!-- Search by Price Range -->
+                        <form method="post" action="ShoppingServlet" class="mb-3">
+                            <input type="hidden" name="action" value="SearchByPrice">
+                            <div class="mb-2">
+                                <label class="form-label">Price Range:</label>
+                                <div class="row g-2">
+                                    <div class="col-6">
+                                        <input type="number" class="form-control" name="minPrice" 
+                                               placeholder="Min $" min="0" step="0.01">
+                                    </div>
+                                    <div class="col-6">
+                                        <input type="number" class="form-control" name="maxPrice" 
+                                               placeholder="Max $" min="0" step="0.01">
+                                    </div>
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-outline-primary btn-sm w-100">
+                                <i class="fas fa-dollar-sign me-1"></i>Search by Price
+                            </button>
+                        </form>
+                        
+                        <!-- Search by Category -->
+                        <form method="post" action="ShoppingServlet" class="mb-3">
+                            <input type="hidden" name="action" value="SearchByCategory">
+                            <div class="mb-2">
+                                <label class="form-label">Category:</label>
+                                <select class="form-select" name="categoryID">
+                                    <option value="">Select Category</option>
+                                    <option value="1">Pizza</option>
+                                    <option value="2">Beverages</option>
+                                    <option value="3">Desserts</option>
+                                    <option value="4">Appetizers</option>
+                                </select>
+                            </div>
+                            <button type="submit" class="btn btn-outline-primary btn-sm w-100">
+                                <i class="fas fa-tags me-1"></i>Search by Category
+                            </button>
+                        </form>
+                        
+                        <!-- Load All Products -->
+                        <form method="post" action="ShoppingServlet">
+                            <input type="hidden" name="action" value="LoadAll">
+                            <button type="submit" class="btn btn-success w-100">
+                                <i class="fas fa-list me-2"></i>Show All Products
+                            </button>
+                        </form>
+                    </div>
+                </div>
+                
+                <!-- Quick Actions (for staff) -->
+                <c:if test="${sessionScope.LOGIN_USER.staff}">
+                    <div class="card mt-3">
+                        <div class="card-header bg-warning">
+                            <i class="fas fa-tools me-2"></i>Staff Tools
+                        </div>
+                        <div class="card-body">
+                            <a href="ProductManagement.html" class="btn btn-warning btn-sm w-100 mb-2">
+                                <i class="fas fa-cog me-2"></i>Manage Products
+                            </a>
+                            <a href="OrderManagement.html" class="btn btn-info btn-sm w-100">
+                                <i class="fas fa-receipt me-2"></i>View Orders
+                            </a>
+                        </div>
+                    </div>
+                </c:if>
+            </div>
+            
+            <!-- Products Display -->
+            <div class="col-lg-9">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <span><i class="fas fa-pizza-slice me-2"></i>Products</span>
+                        <c:if test="${not empty SEARCH_TERM}">
+                            <small class="text-light">${SEARCH_TERM}</small>
+                        </c:if>
+                    </div>
+                    <div class="card-body">
+                        <c:choose>
+                            <c:when test="${empty LIST_PRODUCT}">
+                                <div class="text-center py-5">
+                                    <i class="pizza-icon fas fa-pizza-slice"></i>
+                                    <h5 class="text-muted mt-3">No Products Found</h5>
+                                    <p class="text-muted">Try searching with different criteria or browse all products.</p>
+                                </div>
+                            </c:when>
+                            <c:otherwise>
+                                <div class="row">
+                                    <c:forEach var="product" items="${LIST_PRODUCT}">
+                                        <div class="col-md-6 col-lg-4 mb-4">
+                                            <div class="card product-card">
+                                                <div class="position-relative">
+                                                    <c:choose>
+                                                        <c:when test="${not empty product.productImage}">
+                                                            <img src="images/${product.productImage}" 
+                                                                 alt="${product.productName}" class="product-image">
+                                                        </c:when>
+                                                        <c:otherwise>
+                                                            <div class="product-image">
+                                                                <i class="fas fa-pizza-slice fa-3x text-muted"></i>
+                                                            </div>
+                                                        </c:otherwise>
+                                                    </c:choose>
+                                                    
+                                                    <!-- Availability Badge -->
+                                                    <c:choose>
+                                                        <c:when test="${product.available}">
+                                                            <span class="availability-badge badge bg-success">Available</span>
+                                                        </c:when>
+                                                        <c:when test="${product.unitsInStock <= 5 && product.unitsInStock > 0}">
+                                                            <span class="availability-badge badge bg-warning">Low Stock</span>
+                                                        </c:when>
+                                                        <c:otherwise>
+                                                            <span class="availability-badge badge bg-danger">Out of Stock</span>
+                                                        </c:otherwise>
+                                                    </c:choose>
+                                                </div>
+                                                
+                                                <div class="card-body">
+                                                    <h5 class="card-title">${product.productName}</h5>
+                                                    <p class="card-text text-muted">${product.quantityPerUnit}</p>
+                                                    <p class="product-price">${product.formattedPrice}</p>
+                                                    
+                                                    <c:if test="${sessionScope.LOGIN_USER.staff}">
+                                                        <small class="text-muted d-block">
+                                                            Stock: ${product.unitsInStock} | 
+                                                            Category: ${product.categoryName}
+                                                        </small>
+                                                    </c:if>
+                                                    
+                                                    <div class="mt-3">
+                                                        <c:choose>
+                                                            <c:when test="${product.available}">
+                                                                <form method="post" action="ShoppingServlet" class="d-inline">
+                                                                    <input type="hidden" name="action" value="AddToCart">
+                                                                    <input type="hidden" name="productID" value="${product.productID}">
+                                                                    <div class="input-group input-group-sm mb-2">
+                                                                        <input type="number" class="form-control" name="quantity" 
+                                                                               value="1" min="1" max="${product.unitsInStock}">
+                                                                        <button type="submit" class="btn btn-primary">
+                                                                            <i class="fas fa-cart-plus"></i>
+                                                                        </button>
+                                                                    </div>
+                                                                </form>
+                                                            </c:when>
+                                                            <c:otherwise>
+                                                                <button class="btn btn-secondary btn-sm w-100" disabled>
+                                                                    <i class="fas fa-ban me-2"></i>Unavailable
+                                                                </button>
+                                                            </c:otherwise>
+                                                        </c:choose>
+                                                        
+                                                        <a href="ShoppingServlet?action=ViewDetails&productID=${product.productID}" 
+                                                           class="btn btn-outline-primary btn-sm w-100">
+                                                            <i class="fas fa-info-circle me-2"></i>Details
+                                                        </a>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </c:forEach>
+                                </div>
+                                
+                                <div class="mt-3">
+                                    <small class="text-muted">
+                                        Total products: <strong>${fn:length(LIST_PRODUCT)}</strong>
+                                    </small>
+                                </div>
+                            </c:otherwise>
+                        </c:choose>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Shopping Cart Modal -->
+    <div class="modal fade" id="cartModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="fas fa-shopping-cart me-2"></i>Shopping Cart
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="cartContent">
+                    <div class="text-center">
+                        <i class="fas fa-spinner fa-spin fa-2x text-muted"></i>
+                        <p class="mt-2">Loading cart...</p>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Continue Shopping</button>
+                    <button type="button" class="btn btn-primary" onclick="checkout()">
+                        <i class="fas fa-credit-card me-2"></i>Checkout
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // View cart function
+        function viewCart() {
+            const cartModal = new bootstrap.Modal(document.getElementById('cartModal'));
+            cartModal.show();
+            
+            // Load cart content via AJAX (simplified for demo)
+            fetch('ShoppingServlet?action=ViewCart')
+                .then(response => response.text())
+                .then(data => {
+                    document.getElementById('cartContent').innerHTML = data;
+                })
+                .catch(error => {
+                    document.getElementById('cartContent').innerHTML = 
+                        '<div class="alert alert-danger">Error loading cart</div>';
+                });
+        }
+        
+        // Checkout function
+        function checkout() {
+            if (confirm('Proceed with checkout?')) {
+                window.location.href = 'ShoppingServlet?action=Checkout';
+            }
+        }
+        
+        // Show user profile
+        function showUserProfile() {
+            alert('User profile functionality would be implemented here.');
+        }
+        
+        // Update cart badge (simplified)
+        function updateCartBadge() {
+            // This would typically get the cart count from session
+            const cartBadge = document.getElementById('cartBadge');
+            // cartBadge.textContent = cartCount;
+        }
+        
+        // Auto-dismiss alerts
+        setTimeout(function() {
+            var alerts = document.querySelectorAll('.alert');
+            alerts.forEach(function(alert) {
+                var bsAlert = new bootstrap.Alert(alert);
+                bsAlert.close();
+            });
+        }, 5000);
+        
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            updateCartBadge();
+        });
+    </script>
+</body>
+</html>
