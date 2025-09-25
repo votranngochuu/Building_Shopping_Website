@@ -15,7 +15,7 @@ public class UserDAO {
     // Database connection settings
     private static final String DB_URL = "jdbc:sqlserver://localhost:1433;databaseName=PizzaStore;trustServerCertificate=true;encrypt=false";
     private static final String DB_USER = "sa";
-    private static final String DB_PASSWORD = "123456";
+    private static final String DB_PASSWORD = "12345";
     
     static {
         try {

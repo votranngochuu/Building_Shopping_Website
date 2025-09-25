@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Pizza Management</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .navbar-brand {
+            font-weight: bold;
+            color: #dc3545 !important;
+        }
+        .card {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s ease;
+        }
+        .card:hover {
+            transform: translateY(-3px);
+        }
+        .card-header {
+            background: linear-gradient(135deg, #dc3545 0%, #fd7e14 100%);
+            color: white;
+            border-radius: 15px 15px 0 0 !important;
+            font-weight: 600;
+        }
+        .product-card {
+            height: 100%;
+            border-radius: 15px;
+            overflow: hidden;
+        }
+        .product-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            background: linear-gradient(135deg, #e9ecef 0%, #dee2e6 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .product-price {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #dc3545;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #dc3545 0%, #fd7e14 100%);
+            border: none;
+            border-radius: 25px;
+            padding: 8px 20px;
+            font-weight: 500;
+        }
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
+        }
+        .btn-danger {
+            border-radius: 25px;
+        }
+        .btn-warning {
+            border-radius: 25px;
+        }
+        .btn-info {
+            border-radius: 25px;
+        }
+        .alert {
+            border-radius: 10px;
+            border: none;
+        }
+        .pizza-icon {
+            font-size: 4rem;
+            color: #dc3545;
+            opacity: 0.3;
+        }
+        .admin-actions {
+            display: flex;
+            gap: 5px;
+            flex-wrap: wrap;
+        }
+        .admin-actions .btn {
+            font-size: 0.8rem;
+            padding: 4px 8px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand" href="#">
+                <i class="fas fa-pizza-slice me-2"></i>PizzaStore - Admin Panel
+            </a>
+            
+            <div class="navbar-nav ms-auto">
+                <a class="nav-link" href="ShoppingServlet?action=SalesReport">
+                    <i class="fas fa-chart-bar me-1"></i>Sales Report
+                </a>
+                <a class="nav-link" href="ShoppingServlet?action=CreatePizza">
+                    <i class="fas fa-plus me-1"></i>Add Pizza
+                </a>
+                <a class="nav-link" href="Shopping.html">
+                    <i class="fas fa-store me-1"></i>Shop View
+                </a>
+                <a class="nav-link" href="LoginServlet?action=Logout">
+                    <i class="fas fa-sign-out-alt me-1"></i>Logout
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <!-- Page Header -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <h2><i class="fas fa-cog me-2"></i>Pizza Management</h2>
+                <p class="text-muted">Manage all pizzas in the system</p>
+            </div>
+        </div>
+
+        <!-- Success/Error Messages -->
+        <c:if test="${not empty ERROR}">
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <i class="fas fa-exclamation-triangle me-2"></i>${ERROR}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        </c:if>
+        
+        <c:if test="${not empty MESSAGE}">
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                <i class="fas fa-check-circle me-2"></i>${MESSAGE}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        </c:if>
+
+        <!-- Quick Actions -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <i class="fas fa-tools me-2"></i>Quick Actions
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-3 mb-2">
+                                <a href="ShoppingServlet?action=CreatePizza" class="btn btn-success w-100">
+                                    <i class="fas fa-plus me-2"></i>Add New Pizza
+                                </a>
+                            </div>
+                            <div class="col-md-3 mb-2">
+                                <a href="ShoppingServlet?action=SalesReport" class="btn btn-info w-100">
+                                    <i class="fas fa-chart-bar me-2"></i>Sales Report
+                                </a>
+                            </div>
+                            <div class="col-md-3 mb-2">
+                                <a href="ShoppingServlet?action=ViewPizzaList" class="btn btn-primary w-100">
+                                    <i class="fas fa-refresh me-2"></i>Refresh List
+                                </a>
+                            </div>
+                            <div class="col-md-3 mb-2">
+                                <a href="Shopping.html" class="btn btn-secondary w-100">
+                                    <i class="fas fa-store me-2"></i>Shop View
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pizza List -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <span><i class="fas fa-pizza-slice me-2"></i>All Pizzas</span>
+                        <small class="text-light">Total: ${fn:length(LIST_PRODUCT)} pizzas</small>
+                    </div>
+                    <div class="card-body">
+                        <c:choose>
+                            <c:when test="${empty LIST_PRODUCT}">
+                                <div class="text-center py-5">
+                                    <i class="pizza-icon fas fa-pizza-slice"></i>
+                                    <h5 class="text-muted mt-3">No Pizzas Found</h5>
+                                    <p class="text-muted">Start by adding your first pizza to the system.</p>
+                                    <a href="ShoppingServlet?action=CreatePizza" class="btn btn-primary">
+                                        <i class="fas fa-plus me-2"></i>Add First Pizza
+                                    </a>
+                                </div>
+                            </c:when>
+                            <c:otherwise>
+                                <div class="table-responsive">
+                                    <table class="table table-hover">
+                                        <thead class="table-dark">
+                                            <tr>
+                                                <th>ID</th>
+                                                <th>Image</th>
+                                                <th>Name</th>
+                                                <th>Category</th>
+                                                <th>Price</th>
+                                                <th>Stock</th>
+                                                <th>Status</th>
+                                                <th>Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <c:forEach var="product" items="${LIST_PRODUCT}">
+                                                <tr>
+                                                    <td><strong>${product.productID}</strong></td>
+                                                    <td>
+                                                        <c:choose>
+                                                            <c:when test="${not empty product.productImage}">
+                                                                <img src="images/${product.productImage}" 
+                                                                     alt="${product.productName}" 
+                                                                     class="rounded" 
+                                                                     style="width: 50px; height: 50px; object-fit: cover;">
+                                                            </c:when>
+                                                            <c:otherwise>
+                                                                <div class="bg-light rounded d-flex align-items-center justify-content-center" 
+                                                                     style="width: 50px; height: 50px;">
+                                                                    <i class="fas fa-pizza-slice text-muted"></i>
+                                                                </div>
+                                                            </c:otherwise>
+                                                        </c:choose>
+                                                    </td>
+                                                    <td>
+                                                        <strong>${product.productName}</strong>
+                                                        <br>
+                                                        <small class="text-muted">${product.quantityPerUnit}</small>
+                                                    </td>
+                                                    <td>
+                                                        <span class="badge bg-info">${product.categoryName}</span>
+                                                    </td>
+                                                    <td>
+                                                        <span class="product-price">${product.formattedPrice}</span>
+                                                    </td>
+                                                    <td>
+                                                        <c:choose>
+                                                            <c:when test="${product.unitsInStock > 10}">
+                                                                <span class="badge bg-success">${product.unitsInStock}</span>
+                                                            </c:when>
+                                                            <c:when test="${product.unitsInStock > 0}">
+                                                                <span class="badge bg-warning">${product.unitsInStock}</span>
+                                                            </c:when>
+                                                            <c:otherwise>
+                                                                <span class="badge bg-danger">${product.unitsInStock}</span>
+                                                            </c:otherwise>
+                                                        </c:choose>
+                                                    </td>
+                                                    <td>
+                                                        <c:choose>
+                                                            <c:when test="${product.discontinued}">
+                                                                <span class="badge bg-danger">Discontinued</span>
+                                                            </c:when>
+                                                            <c:when test="${product.unitsInStock > 0}">
+                                                                <span class="badge bg-success">Active</span>
+                                                            </c:when>
+                                                            <c:otherwise>
+                                                                <span class="badge bg-warning">Out of Stock</span>
+                                                            </c:otherwise>
+                                                        </c:choose>
+                                                    </td>
+                                                    <td>
+                                                        <div class="admin-actions">
+                                                            <a href="ShoppingServlet?action=ViewPizzaDetails&productID=${product.productID}" 
+                                                               class="btn btn-info btn-sm" title="View Details">
+                                                                <i class="fas fa-eye"></i>
+                                                            </a>
+                                                            <a href="ShoppingServlet?action=UpdatePizza&productID=${product.productID}" 
+                                                               class="btn btn-warning btn-sm" title="Edit">
+                                                                <i class="fas fa-edit"></i>
+                                                            </a>
+                                                            <button class="btn btn-danger btn-sm" 
+                                                                    onclick="confirmDelete(${product.productID}, '${product.productName}')" 
+                                                                    title="Delete">
+                                                                <i class="fas fa-trash"></i>
+                                                            </button>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            </c:forEach>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </c:otherwise>
+                        </c:choose>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div class="modal fade" id="deleteModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="fas fa-exclamation-triangle text-warning me-2"></i>Confirm Delete
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Are you sure you want to delete the pizza <strong id="deleteProductName"></strong>?</p>
+                    <p class="text-danger"><small>This action cannot be undone.</small></p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <form method="post" action="ShoppingServlet" style="display: inline;">
+                        <input type="hidden" name="action" value="DeletePizza">
+                        <input type="hidden" name="productID" id="deleteProductID">
+                        <button type="submit" class="btn btn-danger">
+                            <i class="fas fa-trash me-2"></i>Delete
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function confirmDelete(productID, productName) {
+            document.getElementById('deleteProductID').value = productID;
+            document.getElementById('deleteProductName').textContent = productName;
+            const deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
+            deleteModal.show();
+        }
+        
+        // Auto-dismiss alerts
+        setTimeout(function() {
+            var alerts = document.querySelectorAll('.alert');
+            alerts.forEach(function(alert) {
+                var bsAlert = new bootstrap.Alert(alert);
+                bsAlert.close();
+            });
+        }, 5000);
+    </script>
+</body>
+</html>

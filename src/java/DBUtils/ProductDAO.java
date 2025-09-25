@@ -6,6 +6,7 @@ import java.util.List;
 import java.math.BigDecimal;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.Date;
 
 /**
  * Product Data Access Object - Enhanced for PizzaStore Shopping Website
@@ -425,6 +426,120 @@ public class ProductDAO {
     }
     
     /**
+     * Get all categories
+     */
+    public List<String> getAllCategories() {
+        List<String> categories = new ArrayList<>();
+        String sql = "SELECT CategoryName FROM Categories ORDER BY CategoryName";
+        
+        try (Connection conn = getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql);
+             ResultSet rs = pstmt.executeQuery()) {
+            
+            while (rs.next()) {
+                categories.add(rs.getString("CategoryName"));
+            }
+            
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Error retrieving categories", e);
+        }
+        
+        return categories;
+    }
+    
+    /**
+     * Get all suppliers
+     */
+    public List<String> getAllSuppliers() {
+        List<String> suppliers = new ArrayList<>();
+        String sql = "SELECT CompanyName FROM Suppliers ORDER BY CompanyName";
+        
+        try (Connection conn = getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql);
+             ResultSet rs = pstmt.executeQuery()) {
+            
+            while (rs.next()) {
+                suppliers.add(rs.getString("CompanyName"));
+            }
+            
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Error retrieving suppliers", e);
+        }
+        
+        return suppliers;
+    }
+    
+    /**
+     * Get sales report by date range
+     */
+    public List<SalesReport> getSalesReportByPeriod(Date startDate, Date endDate) {
+        List<SalesReport> reports = new ArrayList<>();
+        String sql = "SELECT p.ProductName, c.CategoryName, " +
+                    "SUM(od.Quantity) as TotalQuantity, " +
+                    "SUM(od.UnitPrice * od.Quantity) as TotalRevenue, " +
+                    "COUNT(DISTINCT o.OrderID) as OrderCount " +
+                    "FROM Orders o " +
+                    "INNER JOIN [Order Details] od ON o.OrderID = od.OrderID " +
+                    "INNER JOIN Products p ON od.ProductID = p.ProductID " +
+                    "LEFT JOIN Categories c ON p.CategoryID = c.CategoryID " +
+                    "WHERE o.OrderDate BETWEEN ? AND ? " +
+                    "GROUP BY p.ProductID, p.ProductName, c.CategoryName " +
+                    "ORDER BY TotalRevenue DESC";
+        
+        try (Connection conn = getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            
+            pstmt.setDate(1, new java.sql.Date(startDate.getTime()));
+            pstmt.setDate(2, new java.sql.Date(endDate.getTime()));
+            
+            try (ResultSet rs = pstmt.executeQuery()) {
+                while (rs.next()) {
+                    SalesReport report = new SalesReport();
+                    report.setProductName(rs.getString("ProductName"));
+                    report.setCategoryName(rs.getString("CategoryName"));
+                    report.setTotalQuantity(rs.getInt("TotalQuantity"));
+                    report.setTotalRevenue(rs.getBigDecimal("TotalRevenue"));
+                    report.setOrderCount(rs.getInt("OrderCount"));
+                    reports.add(report);
+                }
+            }
+            
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Error retrieving sales report", e);
+        }
+        
+        return reports;
+    }
+    
+    /**
+     * Get total sales amount by period
+     */
+    public BigDecimal getTotalSalesByPeriod(Date startDate, Date endDate) {
+        String sql = "SELECT ISNULL(SUM(od.UnitPrice * od.Quantity), 0) as TotalSales " +
+                    "FROM Orders o " +
+                    "INNER JOIN [Order Details] od ON o.OrderID = od.OrderID " +
+                    "WHERE o.OrderDate BETWEEN ? AND ?";
+        
+        try (Connection conn = getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            
+            pstmt.setDate(1, new java.sql.Date(startDate.getTime()));
+            pstmt.setDate(2, new java.sql.Date(endDate.getTime()));
+            
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getBigDecimal("TotalSales");
+                }
+            }
+            
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Error retrieving total sales", e);
+        }
+        
+        return BigDecimal.ZERO;
+    }
+    
+    /**
      * Create Product object from ResultSet
      */
     private Product createProductFromResultSet(ResultSet rs) throws SQLException {
@@ -441,5 +556,36 @@ public class ProductDAO {
         product.setCategoryName(rs.getString("CategoryName"));
         product.setSupplierName(rs.getString("SupplierName"));
         return product;
+    }
+    
+    /**
+     * Inner class for sales report
+     */
+    public static class SalesReport {
+        private String productName;
+        private String categoryName;
+        private int totalQuantity;
+        private BigDecimal totalRevenue;
+        private int orderCount;
+        
+        // Getters and Setters
+        public String getProductName() { return productName; }
+        public void setProductName(String productName) { this.productName = productName; }
+        
+        public String getCategoryName() { return categoryName; }
+        public void setCategoryName(String categoryName) { this.categoryName = categoryName; }
+        
+        public int getTotalQuantity() { return totalQuantity; }
+        public void setTotalQuantity(int totalQuantity) { this.totalQuantity = totalQuantity; }
+        
+        public BigDecimal getTotalRevenue() { return totalRevenue; }
+        public void setTotalRevenue(BigDecimal totalRevenue) { this.totalRevenue = totalRevenue; }
+        
+        public int getOrderCount() { return orderCount; }
+        public void setOrderCount(int orderCount) { this.orderCount = orderCount; }
+        
+        public String getFormattedRevenue() {
+            return totalRevenue != null ? String.format("$%.2f", totalRevenue) : "$0.00";
+        }
     }
 }

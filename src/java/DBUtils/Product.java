@@ -1,27 +1,28 @@
 package DBUtils;
 
-import java.io.Serializable;
 import java.math.BigDecimal;
+import java.io.Serializable;
+import java.util.Date;
 
 /**
- * Product JavaBean - Enhanced for PizzaStore Shopping Website
+ * Product Entity - Enhanced for PizzaStore Shopping Website
  */
 public class Product implements Serializable {
-    private static final long serialVersionUID = 1L;
-    
     private int productID;
     private String productName;
     private int supplierID;
     private int categoryID;
     private String quantityPerUnit;
     private BigDecimal unitPrice;
+    private int unitsInStock;
+    private boolean discontinued;
     private String productImage;
+    private Date createdDate;
+    private Date modifiedDate;
     
     // Additional fields for display purposes
     private String categoryName;
     private String supplierName;
-    private int unitsInStock;
-    private boolean discontinued;
     
     // Default constructor
     public Product() {

@@ -154,12 +154,12 @@
                     <div class="card-body">
                         <!-- Search by Name -->
                         <form method="post" action="ShoppingServlet" class="mb-3">
-                            <input type="hidden" name="action" value="Search">
+                            <input type="hidden" name="action" value="SearchPizza">
                             <div class="mb-3">
                                 <label class="form-label">Search by Name:</label>
                                 <div class="input-group">
                                     <input type="text" class="form-control" name="searchName" 
-                                           placeholder="Enter product name">
+                                           placeholder="Enter pizza name">
                                     <button type="submit" class="btn btn-primary">
                                         <i class="fas fa-search"></i>
                                     </button>
@@ -169,7 +169,7 @@
                         
                         <!-- Search by Price Range -->
                         <form method="post" action="ShoppingServlet" class="mb-3">
-                            <input type="hidden" name="action" value="SearchByPrice">
+                            <input type="hidden" name="action" value="SearchPizza">
                             <div class="mb-2">
                                 <label class="form-label">Price Range:</label>
                                 <div class="row g-2">
@@ -208,9 +208,9 @@
                         
                         <!-- Load All Products -->
                         <form method="post" action="ShoppingServlet">
-                            <input type="hidden" name="action" value="LoadAll">
+                            <input type="hidden" name="action" value="ViewPizzaListUser">
                             <button type="submit" class="btn btn-success w-100">
-                                <i class="fas fa-list me-2"></i>Show All Products
+                                <i class="fas fa-list me-2"></i>Show All Pizzas
                             </button>
                         </form>
                     </div>
@@ -223,11 +223,14 @@
                             <i class="fas fa-tools me-2"></i>Staff Tools
                         </div>
                         <div class="card-body">
-                            <a href="ProductManagement.html" class="btn btn-warning btn-sm w-100 mb-2">
-                                <i class="fas fa-cog me-2"></i>Manage Products
+                            <a href="ShoppingServlet?action=ViewPizzaList" class="btn btn-warning btn-sm w-100 mb-2">
+                                <i class="fas fa-list me-2"></i>Manage Pizzas
                             </a>
-                            <a href="OrderManagement.html" class="btn btn-info btn-sm w-100">
-                                <i class="fas fa-receipt me-2"></i>View Orders
+                            <a href="ShoppingServlet?action=CreatePizza" class="btn btn-success btn-sm w-100 mb-2">
+                                <i class="fas fa-plus me-2"></i>Add Pizza
+                            </a>
+                            <a href="ShoppingServlet?action=SalesReport" class="btn btn-info btn-sm w-100">
+                                <i class="fas fa-chart-bar me-2"></i>Sales Report
                             </a>
                         </div>
                     </div>
@@ -375,7 +378,12 @@
             const cartModal = new bootstrap.Modal(document.getElementById('cartModal'));
             cartModal.show();
             
-            // Load cart content via AJAX (simplified for demo)
+            // Load cart content
+            loadCartContent();
+        }
+        
+        // Load cart content
+        function loadCartContent() {
             fetch('ShoppingServlet?action=ViewCart')
                 .then(response => response.text())
                 .then(data => {
@@ -385,6 +393,54 @@
                     document.getElementById('cartContent').innerHTML = 
                         '<div class="alert alert-danger">Error loading cart</div>';
                 });
+        }
+        
+        // Update cart item quantity
+        function updateCartItem(productID, quantity) {
+            if (quantity <= 0) {
+                removeCartItem(productID);
+                return;
+            }
+            
+            const formData = new FormData();
+            formData.append('action', 'UpdateCartItem');
+            formData.append('productID', productID);
+            formData.append('quantity', quantity);
+            
+            fetch('ShoppingServlet', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.text())
+            .then(data => {
+                loadCartContent();
+                updateCartBadge();
+            })
+            .catch(error => {
+                console.error('Error updating cart item:', error);
+            });
+        }
+        
+        // Remove cart item
+        function removeCartItem(productID) {
+            if (confirm('Remove this item from cart?')) {
+                const formData = new FormData();
+                formData.append('action', 'RemoveCartItem');
+                formData.append('productID', productID);
+                
+                fetch('ShoppingServlet', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.text())
+                .then(data => {
+                    loadCartContent();
+                    updateCartBadge();
+                })
+                .catch(error => {
+                    console.error('Error removing cart item:', error);
+                });
+            }
         }
         
         // Checkout function

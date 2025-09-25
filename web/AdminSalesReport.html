@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Sales Report</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .navbar-brand {
+            font-weight: bold;
+            color: #dc3545 !important;
+        }
+        .card {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .card-header {
+            background: linear-gradient(135deg, #dc3545 0%, #fd7e14 100%);
+            color: white;
+            border-radius: 15px 15px 0 0 !important;
+            font-weight: 600;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #dc3545 0%, #fd7e14 100%);
+            border: none;
+            border-radius: 25px;
+            padding: 10px 30px;
+            font-weight: 500;
+        }
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
+        }
+        .form-control {
+            border-radius: 10px;
+            border: 2px solid #e9ecef;
+        }
+        .form-control:focus {
+            border-color: #dc3545;
+            box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+        }
+        .alert {
+            border-radius: 10px;
+            border: none;
+        }
+        .table {
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        .table thead th {
+            background-color: #dc3545;
+            color: white;
+            border: none;
+        }
+        .total-sales {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #dc3545;
+        }
+        .chart-icon {
+            font-size: 4rem;
+            color: #dc3545;
+            opacity: 0.3;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand" href="#">
+                <i class="fas fa-pizza-slice me-2"></i>PizzaStore - Admin Panel
+            </a>
+            
+            <div class="navbar-nav ms-auto">
+                <a class="nav-link" href="ShoppingServlet?action=ViewPizzaList">
+                    <i class="fas fa-list me-1"></i>Pizza List
+                </a>
+                <a class="nav-link" href="ShoppingServlet?action=CreatePizza">
+                    <i class="fas fa-plus me-1"></i>Add Pizza
+                </a>
+                <a class="nav-link" href="Shopping.html">
+                    <i class="fas fa-store me-1"></i>Shop View
+                </a>
+                <a class="nav-link" href="LoginServlet?action=Logout">
+                    <i class="fas fa-sign-out-alt me-1"></i>Logout
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <!-- Page Header -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <h2><i class="fas fa-chart-bar me-2"></i>Sales Report</h2>
+                <p class="text-muted">Generate sales statistics by period</p>
+            </div>
+        </div>
+
+        <!-- Success/Error Messages -->
+        <c:if test="${not empty ERROR}">
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <i class="fas fa-exclamation-triangle me-2"></i>${ERROR}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        </c:if>
+        
+        <c:if test="${not empty MESSAGE}">
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                <i class="fas fa-check-circle me-2"></i>${MESSAGE}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        </c:if>
+
+        <!-- Date Range Selection -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <i class="fas fa-calendar me-2"></i>Select Date Range
+                    </div>
+                    <div class="card-body">
+                        <form method="post" action="ShoppingServlet" id="salesReportForm">
+                            <input type="hidden" name="action" value="SalesReport">
+                            
+                            <div class="row">
+                                <div class="col-md-4 mb-3">
+                                    <label for="startDate" class="form-label">
+                                        <i class="fas fa-calendar-alt me-1"></i>Start Date *
+                                    </label>
+                                    <input type="date" class="form-control" id="startDate" name="startDate" 
+                                           value="${START_DATE}" required>
+                                </div>
+                                
+                                <div class="col-md-4 mb-3">
+                                    <label for="endDate" class="form-label">
+                                        <i class="fas fa-calendar-alt me-1"></i>End Date *
+                                    </label>
+                                    <input type="date" class="form-control" id="endDate" name="endDate" 
+                                           value="${END_DATE}" required>
+                                </div>
+                                
+                                <div class="col-md-4 mb-3 d-flex align-items-end">
+                                    <button type="submit" class="btn btn-primary w-100">
+                                        <i class="fas fa-chart-line me-2"></i>Generate Report
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Date Ranges -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <i class="fas fa-clock me-2"></i>Quick Date Ranges
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-2 mb-2">
+                                <button class="btn btn-outline-primary w-100" onclick="setDateRange('today')">
+                                    <i class="fas fa-calendar-day me-1"></i>Today
+                                </button>
+                            </div>
+                            <div class="col-md-2 mb-2">
+                                <button class="btn btn-outline-primary w-100" onclick="setDateRange('week')">
+                                    <i class="fas fa-calendar-week me-1"></i>This Week
+                                </button>
+                            </div>
+                            <div class="col-md-2 mb-2">
+                                <button class="btn btn-outline-primary w-100" onclick="setDateRange('month')">
+                                    <i class="fas fa-calendar me-1"></i>This Month
+                                </button>
+                            </div>
+                            <div class="col-md-2 mb-2">
+                                <button class="btn btn-outline-primary w-100" onclick="setDateRange('quarter')">
+                                    <i class="fas fa-calendar-alt me-1"></i>This Quarter
+                                </button>
+                            </div>
+                            <div class="col-md-2 mb-2">
+                                <button class="btn btn-outline-primary w-100" onclick="setDateRange('year')">
+                                    <i class="fas fa-calendar-check me-1"></i>This Year
+                                </button>
+                            </div>
+                            <div class="col-md-2 mb-2">
+                                <button class="btn btn-outline-primary w-100" onclick="setDateRange('all')">
+                                    <i class="fas fa-infinity me-1"></i>All Time
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sales Report Results -->
+        <c:if test="${not empty SALES_REPORTS}">
+            <!-- Total Sales Summary -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <i class="fas fa-dollar-sign me-2"></i>Sales Summary
+                        </div>
+                        <div class="card-body text-center">
+                            <div class="total-sales">
+                                Total Sales: ${TOTAL_SALES != null ? String.format("$%.2f", TOTAL_SALES) : "$0.00"}
+                            </div>
+                            <p class="text-muted mt-2">
+                                Period: ${START_DATE} to ${END_DATE}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Detailed Sales Report -->
+            <div class="row">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <span><i class="fas fa-table me-2"></i>Detailed Sales Report</span>
+                            <small class="text-light">${fn:length(SALES_REPORTS)} products sold</small>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>Product Name</th>
+                                            <th>Category</th>
+                                            <th>Quantity Sold</th>
+                                            <th>Total Revenue</th>
+                                            <th>Orders</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <c:forEach var="report" items="${SALES_REPORTS}">
+                                            <tr>
+                                                <td>
+                                                    <strong>${report.productName}</strong>
+                                                </td>
+                                                <td>
+                                                    <span class="badge bg-info">${report.categoryName}</span>
+                                                </td>
+                                                <td>
+                                                    <span class="badge bg-success">${report.totalQuantity}</span>
+                                                </td>
+                                                <td>
+                                                    <strong class="text-success">${report.formattedRevenue}</strong>
+                                                </td>
+                                                <td>
+                                                    <span class="badge bg-primary">${report.orderCount}</span>
+                                                </td>
+                                            </tr>
+                                        </c:forEach>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </c:if>
+
+        <!-- No Data Message -->
+        <c:if test="${empty SALES_REPORTS && not empty START_DATE}">
+            <div class="row">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-body text-center py-5">
+                            <i class="chart-icon fas fa-chart-bar"></i>
+                            <h5 class="text-muted mt-3">No Sales Data Found</h5>
+                            <p class="text-muted">No sales were recorded for the selected period.</p>
+                            <p class="text-muted">Period: ${START_DATE} to ${END_DATE}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </c:if>
+
+        <!-- Initial State -->
+        <c:if test="${empty SALES_REPORTS && empty START_DATE}">
+            <div class="row">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-body text-center py-5">
+                            <i class="chart-icon fas fa-chart-bar"></i>
+                            <h5 class="text-muted mt-3">Generate Sales Report</h5>
+                            <p class="text-muted">Select a date range above to generate your sales report.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </c:if>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function setDateRange(range) {
+            const today = new Date();
+            const startDateInput = document.getElementById('startDate');
+            const endDateInput = document.getElementById('endDate');
+            
+            let startDate, endDate;
+            
+            switch(range) {
+                case 'today':
+                    startDate = endDate = today;
+                    break;
+                case 'week':
+                    startDate = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
+                    endDate = today;
+                    break;
+                case 'month':
+                    startDate = new Date(today.getFullYear(), today.getMonth(), 1);
+                    endDate = today;
+                    break;
+                case 'quarter':
+                    const quarterStart = Math.floor(today.getMonth() / 3) * 3;
+                    startDate = new Date(today.getFullYear(), quarterStart, 1);
+                    endDate = today;
+                    break;
+                case 'year':
+                    startDate = new Date(today.getFullYear(), 0, 1);
+                    endDate = today;
+                    break;
+                case 'all':
+                    startDate = new Date('2020-01-01');
+                    endDate = today;
+                    break;
+            }
+            
+            startDateInput.value = startDate.toISOString().split('T')[0];
+            endDateInput.value = endDate.toISOString().split('T')[0];
+        }
+        
+        // Form validation
+        document.getElementById('salesReportForm').addEventListener('submit', function(e) {
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+            
+            if (!startDate || !endDate) {
+                e.preventDefault();
+                alert('Please select both start and end dates.');
+                return;
+            }
+            
+            if (new Date(startDate) > new Date(endDate)) {
+                e.preventDefault();
+                alert('Start date must be before end date.');
+                return;
+            }
+        });
+        
+        // Auto-dismiss alerts
+        setTimeout(function() {
+            var alerts = document.querySelectorAll('.alert');
+            alerts.forEach(function(alert) {
+                var bsAlert = new bootstrap.Alert(alert);
+                bsAlert.close();
+            });
+        }, 5000);
+    </script>
+</body>
+</html>

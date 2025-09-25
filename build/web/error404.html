@@ -1,0 +1,101 @@
+<!-- 404 Error Page for Pizza Store Website -->
+<!-- Custom error page to display when a requested page is not found -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>404 - Page Not Found</title>
+    <style>
+        /* CSS Reset - Remove default margins and padding */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        /* Main page styling with gradient background */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        /* Error container with card-like appearance */
+        .error-container {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            text-align: center;
+            max-width: 500px;
+            width: 90%;
+        }
+        
+        /* Large 404 error code styling */
+        .error-code {
+            font-size: 6em;
+            color: #667eea;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        
+        /* Main heading styling */
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+        
+        /* Description text styling */
+        p {
+            color: #666;
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+        
+        /* Back to home button styling */
+        .btn {
+            padding: 15px 40px;
+            font-size: 1.1em;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+        
+        /* Button hover effects */
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
+        }
+        
+        /* Sad pizza emoji styling */
+        .pizza-sad {
+            font-size: 3em;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="error-container">
+        <!-- Pizza emoji with sad face to match the theme -->
+        <div class="pizza-sad">🍕😢</div>
+        <!-- Large 404 error code display -->
+        <div class="error-code">404</div>
+        <!-- Main error message -->
+        <h1>Page Not Found</h1>
+        <!-- User-friendly error description -->
+        <p>Oops! The page you're looking for seems to have gone missing. It might have been moved, deleted, or perhaps it never existed.</p>
+        <!-- Navigation button back to home page -->
+        <a href="index.html" class="btn">Go Back Home</a>
+    </div>
+</body>
+</html>
